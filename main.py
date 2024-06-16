@@ -1,22 +1,18 @@
 import threading
-import queue
 import time
-
-### Imported modules
-from camera_module import open_webcam
-from camera_module import TaskState
+from camera_module import open_webcam, TaskState
 from manual_pad_module import ManualModePad
 from steering_module import SteeringModule
+from utils.circular_queue import CircularQueue
 
-def main_task():  
-    communication_queue = queue.Queue()
-    
+def main_task(communication_queue):
     state = TaskState()
+    stop_event = threading.Event()
     manual_mode_thread = None
-    steering_task_thread = threading.Thread(target=start_steering_task, args=(communication_queue,))
+
+    # Start steering task
+    steering_task_thread = threading.Thread(target=start_steering_task, args=(communication_queue, stop_event))
     steering_task_thread.start()
-
-
 
     while True:
         print("Main task is running...")
@@ -24,22 +20,31 @@ def main_task():
         print("1: Automatic mode")
         print("2: Manual mode")
         print("3: Open camera")
-        print("4: Exit app")
+        print("4: Exit manual mode")
+        print("5: Exit app")
 
         choice = input()
         if choice == '2':
             if manual_mode_thread is None or not manual_mode_thread.is_alive():
                 print('2: Entering manual mode...')
-                manual_mode_thread = threading.Thread(target=start_manual_mode, args=(communication_queue,))
+                manual_mode_thread = threading.Thread(target=start_manual_mode, args=(communication_queue, stop_event))
                 manual_mode_thread.start()
             else:
-                print('Manual mode is already active')
+                print('Manual mode is already running')
 
-        if choice == '3':
+        elif choice == '3':
             print("Opening camera module")
             start_camera_task(state)
         elif choice == '4':
-            print("Exiting app")
+            print("Exiting the manual mode...")
+            stop_event.set()  # Signal all threads to stop
+            if manual_mode_thread:
+                terminate_thread(manual_mode_thread)  # Terminate the manual_mode_thread forcibly
+        elif choice == '5':
+            if manual_mode_thread.is_alive():
+                terminate_thread(manual_mode_thread)
+            if steering_task_thread.is_alive():
+                steering_task_thread.join()
             break
 
         time.sleep(1)
@@ -59,18 +64,34 @@ def start_camera_task(state):
     elif state.status == 'Done':
         print(f"Camera task ended successfully: {state.message}")
 
-def start_manual_mode(communication_queue):
-    controller = ManualModePad(communication_queue=communication_queue, interface='/dev/input/js0', connecting_using_ds4drv=False)
-    controller.listen(timeout=60)
+def start_manual_mode(communication_queue, stop_event):
+    controller = ManualModePad(communication_queue=communication_queue, stop_event=stop_event, interface='/dev/input/js0', connecting_using_ds4drv=False)
+    controller.listen()
 
-def start_steering_task(communication_queue):
-    steering_module = SteeringModule(communication_queue=communication_queue)
+def start_steering_task(communication_queue, stop_event):
+    steering_module = SteeringModule(communication_queue, stop_event)
     steering_module.steering_module()
 
+def terminate_thread(thread):
+    import ctypes
+    if not thread.is_alive():
+        return
+    
+    tid = thread.ident
+    if tid is None:
+        return
+
+    # On POSIX systems, use pthread_cancel to terminate thread
+    if hasattr(thread, 'native_id'):
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_ulong(tid), ctypes.py_object(SystemExit))
+    else:
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(SystemExit))
+
 def main():
-    main_task()
+    communication_queue = CircularQueue(max_size=10)
 
-
+    # Start main task
+    main_task(communication_queue)
 
 if __name__ == "__main__":
     main()

@@ -1,34 +1,42 @@
+# manual_pad_module.py
 import queue
 import threading
 import time
-
 from utils.message import Message
 from pyPS4Controller.controller import Controller
 
 class ManualModePad(Controller):
 
-    def __init__(self, communication_queue , **kwargs,):
+    def __init__(self, communication_queue, stop_event, **kwargs):
+        Controller.__init__(self, **kwargs)
         self.communication_queue = communication_queue
-        super().__init__(**kwargs)
+        self.stop_event = stop_event
+
+
+    def listen_till_event(self, *args, **kwargs):
+        while True:  
+            if self.stop_event.is_set():
+                print("Event received - sth is goin on")
+            self.listen(timeout=30)
+            time.sleep(0.1)
+
 
     def on_x_press(self):
         print("X button pressed")
         message = Message("X button pressed")
         self.communication_queue.put(message)
-        #time.sleep(0.5)
+        time.sleep(0.01)
 
     def on_x_release(self):
         print("X button released")
         message = Message("X button released")
         self.communication_queue.put(message)
-        #time.sleep(0.5)
+        time.sleep(0.01)
 
     def on_circle_press(self):
         print("Circle button pressed")
         message = Message("Circle button pressed")
         self.communication_queue.put(message)
-        time.sleep(0.5)
-        #exit()  # Exit the program when Circle button is pressed (example)
 
     # Add other important actions as needed
     def on_square_press(self):
@@ -57,11 +65,11 @@ class ManualModePad(Controller):
 
     # You can also handle joystick movements if needed
     def on_L3_up(self, value):
-        if value < -600:
-            print("Left Up !")
+        if value < -3000:
+            print("Left Up: value {value} !", value)
             message = Message("Forward")
             self.communication_queue.put(message)
-            time.sleep(0.1)
+            #time.sleep(0.1)
 
     def on_L3_down(self, value):
         pass
@@ -84,6 +92,3 @@ class ManualModePad(Controller):
 
     def on_R3_right(self, value):
         pass
-
-# controller = ManualModePad(interface="/dev/input/js0", connecting_using_ds4drv=False)
-# controller.listen(timeout=60)
