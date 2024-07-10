@@ -1,17 +1,20 @@
 import threading
 import time
 from camera_module import open_webcam, TaskState
+from engines_module import MotorModule
 from manual_pad_module import ManualModePad
 from steering_module import SteeringModule
 from utils.circular_queue import CircularQueue
 
-def main_task(communication_queue):
+def main_task(communication_queue, status_queue):
     state = TaskState()
     stop_event = threading.Event()
+    change_state = threading.Event()
     manual_mode_thread = None
 
     # Start steering task
     steering_task_thread = threading.Thread(target=start_steering_task, args=(communication_queue, stop_event))
+    auto_mode_thread = threading.Thread(target=start_auto_task, args=(status_queue, change_state))
     steering_task_thread.start()
 
     while True:
@@ -24,6 +27,12 @@ def main_task(communication_queue):
         print("5: Exit app")
 
         choice = input()
+        if choice == '1':
+            print("Starting manual mode...")
+            auto_mode_thread.start()
+            if change_state.is_set():
+                auto_mode_thread.join()
+        
         if choice == '2':
             if manual_mode_thread is None or not manual_mode_thread.is_alive():
                 print('2: Entering manual mode...')
@@ -41,10 +50,14 @@ def main_task(communication_queue):
             if manual_mode_thread:
                 terminate_thread(manual_mode_thread)  # Terminate the manual_mode_thread forcibly
         elif choice == '5':
-            if manual_mode_thread.is_alive():
+            if manual_mode_thread is not None and manual_mode_thread.is_alive():
                 terminate_thread(manual_mode_thread)
             if steering_task_thread.is_alive():
+                stop_event.set()
                 steering_task_thread.join()
+            if auto_mode_thread.is_alive():
+                change_state.set()
+                auto_mode_thread.join()
             break
 
         time.sleep(1)
@@ -71,6 +84,11 @@ def start_manual_mode(communication_queue, stop_event):
 def start_steering_task(communication_queue, stop_event):
     steering_module = SteeringModule(communication_queue, stop_event)
     steering_module.steering_module()
+    
+def start_auto_task(status_queue, change_status):
+    motor_module = MotorModule(status_queue, change_status)
+    motor_module.setup()
+    motor_module.run_motor_for_revolutions(5, 30)
 
 def terminate_thread(thread):
     import ctypes
@@ -89,9 +107,10 @@ def terminate_thread(thread):
 
 def main():
     communication_queue = CircularQueue(max_size=10)
+    status_queue = CircularQueue(max_size=1)
 
     # Start main task
-    main_task(communication_queue)
+    main_task(communication_queue, status_queue)
 
 if __name__ == "__main__":
     main()
