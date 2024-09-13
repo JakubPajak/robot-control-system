@@ -36,7 +36,7 @@ def main_task(communication_queue, status_queue):
         if choice == '2':
             if manual_mode_thread is None or not manual_mode_thread.is_alive():
                 print('2: Entering manual mode...')
-                manual_mode_thread = threading.Thread(target=start_manual_mode, args=(communication_queue, stop_event))
+                manual_mode_thread = threading.Thread(target=start_manual_mode, args=(communication_queue, stop_event, 10))
                 manual_mode_thread.start()
             else:
                 print('Manual mode is already running')
@@ -58,7 +58,7 @@ def main_task(communication_queue, status_queue):
             if auto_mode_thread.is_alive():
                 change_state.set()
                 auto_mode_thread.join()
-            break
+            break 
 
         time.sleep(1)
 
@@ -86,9 +86,8 @@ def start_steering_task(communication_queue, stop_event):
     steering_module.steering_module()
     
 def start_auto_task(status_queue, change_status):
-    motor_module = MotorModule(status_queue, change_status)
-    motor_module.setup()
-    motor_module.run_motor_for_revolutions(5, 30)
+    motor_module = MotorModule(status_queue, change_status, data=5)
+    motor_module.send_data()
 
 def terminate_thread(thread):
     import ctypes

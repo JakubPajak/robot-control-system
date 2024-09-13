@@ -14,7 +14,7 @@ class MotorModule:
         self.data = data
 
     def send_data(self):
-        ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+        ser = serial.Serial('/dev/serial0', 9600, timeout=1)
 
         
         if ser.is_open:
@@ -25,5 +25,5 @@ class MotorModule:
         
         res = ser.readline().decode('utf-8')
         print(f"Received from Arduino: {res}")
-        if res != 0:
-            ser.close()
+
+        ser.close()

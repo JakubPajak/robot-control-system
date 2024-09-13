@@ -1,7 +1,9 @@
 import threading
 import time
+import serial
 from utils.message import Message
 from utils.circular_queue import CircularQueue
+
 
 class SteeringModule:
     def __init__(self, communication_queue, stop_event):
@@ -16,3 +18,5 @@ class SteeringModule:
             time.sleep(0.01)
         if self.stop_event.is_set():
             print("Event received - ending the function")
+
+
