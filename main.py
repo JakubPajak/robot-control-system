@@ -3,6 +3,7 @@ import time
 from camera_module import open_webcam, TaskState
 from engines_module import MotorModule
 from manual_pad_module import ManualModePad
+from serial_com import SerialCommunication
 from steering_module import SteeringModule
 from utils.circular_queue import CircularQueue
 
@@ -86,8 +87,8 @@ def start_steering_task(communication_queue, stop_event):
     steering_module.steering_module()
     
 def start_auto_task(status_queue, change_status):
-    motor_module = MotorModule(status_queue, change_status, data=5)
-    motor_module.send_data()
+    serial_module = SerialCommunication()
+    serial_module.send_data()
 
 def terminate_thread(thread):
     import ctypes

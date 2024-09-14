@@ -3,32 +3,34 @@ import time
 
 class SerialCommunication:
     
-    def __init__():
-        ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+    def __init__(self):
+        self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
 
-        if ser.is_open:
+        if self.ser.is_open:
             print("Serial port is open")
 
-        ser.reset_input_buffer()
-        ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
 
-    def send_data():
+    def send_data(self):
+        dir_table = [1, 2, 5, 0]
+        i = 0
 
         try:
             while True:
-                input_data = input("Enter the number you want to send ")
-                ser.write((input_data + '\n').encode('utf-8'))
+                self.ser.write(('{dir_table[i]}' + '\n').encode('utf-8'))
 
                 print("The message has been sent")
                 time.sleep(2)
 
-                if ser.in_waiting > 0:
-                    rec  = ser.readline().decode('utf-8').strip()
+                if self.ser.in_waiting > 0:
+                    rec  = self.ser.readline().decode('utf-8').strip()
                     print("Received: ", rec)
+                    i += 1
                 else:   
                     print("No incoming data!")
 
         finally:
-            ser.close()
+            self.ser.close()
                  
         
