@@ -12,25 +12,21 @@ class SerialCommunication:
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
 
-    def send_data(self):
-        dir_table = [1, 2, 5, 0]
-        i = 0
-
+    def send_data(self, data):
         try:
-            while True:
-                self.ser.write(('{dir_table[i]}' + '\n').encode('utf-8'))
+            
+            self.ser.write(f'{data}\n'.encode('utf-8'))  # Wysyłanie liczby z zakończeniem \n
+            print(f"The message {data} has been sent")
+            time.sleep(2)  # Czekamy na odpowiedź
 
-                print("The message has been sent")
-                time.sleep(2)
-
-                if self.ser.in_waiting > 0:
-                    rec  = self.ser.readline().decode('utf-8').strip()
-                    print("Received: ", rec)
-                    i += 1
-                else:   
-                    print("No incoming data!")
-
-        finally:
-            self.ser.close()
-                 
-        
+            
+            if self.ser.in_waiting > 0:
+                rec = self.ser.readline().decode('utf-8').strip()  # Usunięcie \r\n
+                print("Received: ", rec)
+                return True
+            else:   
+                print("No incoming data!")
+                return False
+        except Exception as e:
+            print(f'Exception occurred during serial communication: {e}')
+            return False
