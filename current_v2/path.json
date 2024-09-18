@@ -1,0 +1,58 @@
+{
+    "robot-instrucitons": {
+        "paths": [{
+            "path1": [
+      {
+        "action": "forward",
+        "distance": 100,  
+        "speed": 50       
+      },
+      {
+        "action": "turn",
+        "direction": "left",
+        "angle": 90      
+      },
+      {
+        "action": "forward",
+        "distance": 50,
+        "speed": 40
+      },
+      {
+        "action": "turn",
+        "direction": "right",
+        "angle": 45
+      },
+      {
+        "action": "forward",
+        "distance": 200,
+        "speed": 70
+      }],
+    "path2": [
+      {
+        "action": "forward",
+        "distance": 100,  
+        "speed": 50       
+      },
+      {
+        "action": "turn",
+        "direction": "left",
+        "angle": 90      
+      },
+      {
+        "action": "forward",
+        "distance": 50,
+        "speed": 40
+      },
+      {
+        "action": "turn",
+        "direction": "right",
+        "angle": 45
+      },
+      {
+        "action": "forward",
+        "distance": 200,
+        "speed": 70
+      }]
+    }]
+    }
+}
