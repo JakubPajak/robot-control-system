@@ -5,7 +5,7 @@ from ardu_upload_module import ArduinoUploader
 
 ####################---> Description <---##################### 
 #
-#    The AutoModeModule class is responsible for managing the correct steering
+#   The AutoModeModule class is responsible for managing the correct steering
 #   for robot in auto mode - without external input.
 #
 #   Concept:
@@ -15,13 +15,11 @@ from ardu_upload_module import ArduinoUploader
 #   consists of actions like "Turn" and "forward".
 #
 #   Each instruction is converted into a 5-byte frame, which is structured as:
-#     - Byte 0: Action type (1 for "Turn", 0 for "forward")
-#     - Byte 1: Direction (for "Turn") or Distance (for "forward")
-#     - Bytes 2-3: Angle (for "Turn") or Speed (for "forward") – packed as a 2-byte unsigned integer
-#     - Byte 4: Reserved for future use
-#
-#   By sending fixed-length 5-byte frames, the data can be easily parsed and
-#   interpreted on the Arduino side.
+#     - Byte 0: 
+#           a) Bit 7 -> Action type (1 for "Turn", 0 for "forward")
+#            b) Bit 6 -> Direction (0 for left, 1 for right, for turns)
+#            c) Bit 5-0 -> Reserved
+#     - Byte 1-2: 16-bit data value, either the angle for turns or the speed for forward movement.
 #
 ########################---> End <---##########################
 
@@ -63,29 +61,24 @@ class AutoModeModule:
             formatted_frame_table = []
 
             for step in path:
-                temp_frame = bytearray(5)  
+                temp_frame = bytearray(3)
 
                 if step["action"] == "Turn":
                     action = 1  
                     direction = 0 if step["direction"] == "left" else 1  
                     angle = step["angle"]
 
-                    
-                    temp_frame[0] = action
-                    temp_frame[1] = direction
-                    temp_frame[2:4] = struct.pack(">H", angle)  
-                    temp_frame[4] = 0  
+                    temp_frame[0] = (action << 7) | (direction << 6)
+
+                    temp_frame[1:3] = struct.pack(">H", angle)  
 
                 elif step["action"] == "forward":
                     action = 0  
-                    distance = step["distance"]
                     speed = step["speed"]
 
-                    
-                    temp_frame[0] = action
-                    temp_frame[1] = distance
-                    temp_frame[2:4] = struct.pack(">H", speed)  
-                    temp_frame[4] = 0  
+                    temp_frame[0] = (action << 7)
+
+                    temp_frame[1:3] = struct.pack(">H", speed) 
 
                 formatted_frame_table.append(temp_frame)
 

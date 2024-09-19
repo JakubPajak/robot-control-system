@@ -27,7 +27,8 @@
         "distance": 200,
         "speed": 70
       }],
-    "path2": [
+      
+            "path2": [
       {
         "action": "forward",
         "distance": 100,  
