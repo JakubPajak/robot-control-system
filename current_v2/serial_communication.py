@@ -22,25 +22,32 @@ import time
 class SerialCommunication:
     
     def __init__(self):
-        self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+        self.ser = serial.Serial('/dev/ttyUSB0', 250000, timeout=1)
 
         if self.ser.is_open:
             print("Serial port is open")
 
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
+        self.ser.write(bytes([0b00000000, 0x00]))
 
     def send_data(self, data):
         try:
             
             self.ser.write(data)  
             print(f"The binary message {data} has been sent")
-            time.sleep(2)  
+            time.sleep(1)  
 
             
             if self.ser.in_waiting > 0:
-                rec = self.ser.readline().decode('utf-8').strip()  
-                print("Received: ", rec)
+                # rec = self.ser.readline()  
+                # print("Received: ", rec)
+
+                while self.ser.in_waiting > 0:  # Dopóki są dane w buforze wejściowym
+                    dane = self.ser.read(self.ser.in_waiting)  # Odczyt całego dostępnego bufora
+                    print(dane)  # Wyświetlenie odebranych danych w postaci surowej
+                    print(dane.decode('utf-8', errors='ignore'))  # Wyświetlenie odebranych danych jako string (jeśli to tekst)
+
                 return True
             else:   
                 print("No incoming data!")

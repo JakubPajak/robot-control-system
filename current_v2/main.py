@@ -51,7 +51,7 @@ def mainTask(serial_com):
 
 def start_auto_control_task(serial_com, status):
     auto_module = AutoModeModule(serial_com, status)
-    auto_module.select_path()
+    auto_module.selectPath()
 
 def main():
     serial_com = SerialCommunication()
