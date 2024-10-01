@@ -29,26 +29,31 @@ class SerialCommunication:
 
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
-        self.ser.write(bytes([0b00000000, 0x00]))
+        # self.ser.write(bytes([0b00000000, 0x00]))
 
     def send_data(self, data):
         try:
-            
+            # Wyślij ramkę danych
             self.ser.write(data)  
             print(f"The binary message {data} has been sent")
-            time.sleep(1)  
+            time.sleep(4)  # Oczekiwanie na odpowiedź (możesz dostosować ten czas)
 
-            
+            # Sprawdź, czy są dostępne dane do odczytu
             if self.ser.in_waiting > 0:
-                # rec = self.ser.readline()  
-                # print("Received: ", rec)
+                dane = b""  # Inicjalizacja pustego bajtu do przechowywania odebranych danych
 
-                while self.ser.in_waiting > 0:  # Dopóki są dane w buforze wejściowym
-                    dane = self.ser.read(self.ser.in_waiting)  # Odczyt całego dostępnego bufora
-                    print(dane)  # Wyświetlenie odebranych danych w postaci surowej
-                    print(dane.decode('utf-8', errors='ignore'))  # Wyświetlenie odebranych danych jako string (jeśli to tekst)
+                # Odczyt dostępnych danych z bufora
+                while self.ser.in_waiting > 0:
+                    dane += self.ser.read(self.ser.in_waiting)
+                    
+                # Konwersja danych na string
+                dane_str = dane.decode('utf-8', errors='ignore')
+                print("Received data: ", dane_str)  # Wyświetlenie danych jako string
 
-                return True
+                # Sprawdzenie, czy odebrane dane zawierają frazę "FINISH"
+                if "FINISH" in dane_str:
+                    print('Arduino confirmed movement completion.')
+                    return True
             else:   
                 print("No incoming data!")
                 return False

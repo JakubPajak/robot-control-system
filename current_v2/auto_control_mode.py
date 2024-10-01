@@ -35,22 +35,25 @@ class AutoModeModule:
 
         
     def selectPath(self):
-        status = False
-
-        # Here must be added section responsible for managing the sequence 
-        # and for recognizing which path to choose SO
-        # camera class must have its connection
-
+        # Interpretacja ścieżki z JSONa (zakładając, że masz już tę funkcję)
         path_id = 'path2'
         path = self.InterpretPathFromJson(path_id)
+
+        # Przechodzenie przez kolejne kroki ścieżki
         for i in range(len(path)):
-            while not status:
-                status = self.serial_com.send_data(path[i])
-            print(f'Order nr {i} have been performed with value: {path[i]}')
-            status = False
+            # Ustawienie statusu na False, aby sprawdzić, czy ruch został wykonany
+            self.status = False
 
-        self.status.set()
+            # Wysyłanie danych do Arduino i oczekiwanie na potwierdzenie zakończenia
+            while not self.status:
+                self.status = self.serial_com.send_data(path[i])
+                if self.status:
+                    print(f'Order nr {i} has been performed with value: {path[i]}')
+                else:
+                    print(f'Failed to perform order nr {i}, retrying...')
 
+            # Przejście do kolejnego kroku, gdy Arduino potwierdzi zakończenie
+            print(f'Order nr {i} completed successfully.')
 
     def InterpretPathFromJson(self, path_id):
         with open('path.json', 'r') as file:
