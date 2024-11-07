@@ -1,4 +1,5 @@
 import json
+import time
 from ardu_upload_module import ArduinoUploader
 
 ####################---> Description <---##################### 
@@ -46,6 +47,7 @@ class AutoModeModule:
 
             # Wysyłanie danych do Arduino i oczekiwanie na potwierdzenie zakończenia
             while not self.status:
+                time.sleep(1)
                 self.status = self.serial_com.send_data(path[i])
                 if self.status:
                     print(f'Order nr {i} has been performed with value: {path[i]}')
@@ -91,6 +93,11 @@ class AutoModeModule:
                     temp_frame[0] = (action << 7)  # Ustawienie akcji
 
                     temp_frame[1] = distance & 0xFF  # Ustawienie dolnego bajtu prędkości (0-255)
+
+                elif step["action"] == "grab":
+                    servo_action = 1  # Ustawienie wartości dla serwo
+                    servo_action_type = 1 if step["grab_type"] == "close" else 0  # Ustawienie typu akcji serwo (open/close)
+                    temp_frame[0] = (servo_action << 4) | (servo_action_type << 3)
 
                 formatted_frame_table.append(temp_frame)
 

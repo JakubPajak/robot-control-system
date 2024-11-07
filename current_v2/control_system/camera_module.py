@@ -3,6 +3,8 @@ import time
 import cv2
 import numpy as np
 import imutils
+from picamera2 import Picamera2
+from libcamera import controls
 
 # Define color boundaries in HSV space
 colors = {
@@ -15,7 +17,6 @@ colors = {
 
 # Common color for displaying labels and contours
 display_color = (255, 255, 255)
-
 
 def find_color(frame, points):
     mask = cv2.inRange(frame, points[0], points[1])  # Create mask with boundaries
@@ -32,19 +33,25 @@ def find_color(frame, points):
                 return c, cx, cy
     return None
 
-
 class CameraModule:
     def __init__(self):
-        self.camera = cv2.VideoCapture(0)
+        # Initialize the Picamera2 object
+        self.camera = Picamera2()
+
+        video_config = self.camera.create_video_configuration(main={"size": (1920, 1080), "format": "RGB888"})
+        self.camera.configure(video_config)
+        self.camera.start()
+
+        self.camera.set_controls({"AfMode": controls.AfModeEnum.Continuous})
+        # self.camera.set_controls({"AfTrigger": controls.AfTriggerEnum.Start})
+
 
     def process_image(self):
         while True:
-            success, frame = self.camera.read()
-            if not success:
-                break
-            
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            # Capture an image
+            frame = self.camera.capture_array()
+            hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)  # Convert to HSV color space
+            gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
             for name, color_bounds in colors.items():
                 result = find_color(hsv, color_bounds)
@@ -72,7 +79,7 @@ class CameraModule:
                             cv2.putText(frame, "Square", (cx, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, display_color, 2)
 
             # Display the frame
-            cv2.imshow("Processed Frame", frame)
+            # cv2.imshow("Processed Frame", frame)
 
             # Encode and yield the frame as bytes for HTTP streaming or further processing
             ret, buffer = cv2.imencode('.jpg', frame)
@@ -84,6 +91,6 @@ class CameraModule:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        # Release the camera and destroy all OpenCV windows
-        self.camera.release()
+        # Stop the camera and destroy all OpenCV windows
+        self.camera.stop()
         cv2.destroyAllWindows()

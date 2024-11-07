@@ -1,60 +1,149 @@
 {
-  "robot_instructions": {
-      "paths": {
-          "path1": [
+    "robot_instructions": {
+        "paths": {
+            "path1": [
               {
-                  "action": "turn",
-                  "direction": "left",
-                  "angle": 90
-              },
-              {
-                  "action": "forward",
-                  "distance": 16,
-                  "speed": 50
-              },
-              {
-                  "action": "forward",
-                  "distance": 50,
-                  "speed": 40
-              },
-              {
-                  "action": "turn",
-                  "direction": "right",
-                  "angle": 45
-              },
-              {
-                  "action": "forward",
-                  "distance": 200,
-                  "speed": 70
-              }
-          ],
-          "path2": [
-            {
-                "action": "forward",
-                "distance": 50,
+                "action": "grab",
+                "grab_type": "open",
                 "speed": 40
             },
+                {
+                  "action": "forward",
+                  "distance": 38,
+                  "speed": 90
+                },
+                {
+                  "action": "turn",
+                  "direction": "right",
+                  "angle": 90
+                },
+                {
+                  "action": "forward",
+                  "distance": 49,
+                  "speed": 90
+              },
+              {
+                  "action": "grab",
+                  "grab_type": "close"
+              },
               {
                   "action": "turn",
                   "direction": "left",
                   "angle": 90
               },
               {
+                "action": "turn",
+                "direction": "left",
+                "angle": 90
+            },
+              {
                   "action": "forward",
-                  "distance": 50,
+                  "distance": 144,
                   "speed": 40
               },
               {
-                  "action": "turn",
-                  "direction": "right",
-                  "angle": 45
+                "action": "turn",
+                "direction": "right",
+                "angle": 90
               },
               {
-                  "action": "forward",
-                  "distance": 200,
-                  "speed": 70
+                "action": "forward",
+                "distance": 64,
+                "speed": 40
+              },
+            {
+              "action": "grab",
+              "grab_type": "open",
+              "speed": 40
+          }
+            ],
+            "path2": [
+              
+              {
+                "action": "forward",
+                "distance": 55,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "left",
+                "angle": 89
+              },
+              {
+                "action": "forward",
+                "distance": 86,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "left",
+                "angle": 89
+              },
+              {
+                "action": "forward",
+                "distance": 55,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "left",
+                "angle": 89
+              },
+              {
+                "action": "forward",
+                "distance": 86,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "left",
+                "angle": 89
               }
-          ]
-      }
+            ],
+            "path3": [
+              
+              {
+                "action": "forward",
+                "distance": 55,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "right",
+                "angle": 90
+              },
+              {
+                "action": "forward",
+                "distance": 86,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "right",
+                "angle": 90
+              },
+              {
+                "action": "forward",
+                "distance": 55,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "right",
+                "angle": 90
+              },
+              {
+                "action": "forward",
+                "distance": 86,
+                "speed": 40
+              },
+              {
+                "action": "turn",
+                "direction": "right",
+                "angle": 90
+              }
+            ]
+        }
+    }
   }
-}
+  

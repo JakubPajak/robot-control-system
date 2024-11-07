@@ -29,34 +29,35 @@ class SerialCommunication:
 
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
-        # self.ser.write(bytes([0b00000000, 0x00]))
+        #self.ser.write(bytes([0b00000000, 0x00]))
 
-    def send_data(self, data):
+    def send_data(self, data, timeout=5):
         try:
             # Wyślij ramkę danych
             self.ser.write(data)  
             print(f"The binary message {data} has been sent")
-            time.sleep(4)  # Oczekiwanie na odpowiedź (możesz dostosować ten czas)
 
-            # Sprawdź, czy są dostępne dane do odczytu
-            if self.ser.in_waiting > 0:
-                dane = b""  # Inicjalizacja pustego bajtu do przechowywania odebranych danych
+            # Czas startowy dla timeoutu
+            start_time = time.time()
+            dane_str = ""
+            
+            # Pętla oczekiwania na odpowiedź
+            while True:
+                # Sprawdź, czy upłynął czas timeoutu
+                if time.time() - start_time > timeout:
+                    print("Timeout reached, no response from Arduino.")
+                    #return False  # Zwróć False, jeśli przekroczony czas oczekiwania
+                
+                if self.ser.in_waiting > 0:
+                    # Odczytuj dane po bajtach
+                    dane = self.ser.read(self.ser.in_waiting)
+                    dane_str += dane.decode('utf-8', errors='ignore')
+                    print(dane_str)
+                    # Sprawdź, czy wiadomość "FINISH" została odebrana
+                    if "FINISH" in dane_str:
+                        print('Arduino confirmed movement completion.')
+                        return True
 
-                # Odczyt dostępnych danych z bufora
-                while self.ser.in_waiting > 0:
-                    dane += self.ser.read(self.ser.in_waiting)
-                    
-                # Konwersja danych na string
-                dane_str = dane.decode('utf-8', errors='ignore')
-                print("Received data: ", dane_str)  # Wyświetlenie danych jako string
-
-                # Sprawdzenie, czy odebrane dane zawierają frazę "FINISH"
-                if "FINISH" in dane_str:
-                    print('Arduino confirmed movement completion.')
-                    return True
-            else:   
-                print("No incoming data!")
-                return False
         except Exception as e:
             print(f'Exception occurred during serial communication: {e}')
             return False

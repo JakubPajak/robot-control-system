@@ -3,12 +3,12 @@ import time
 import os
 import sys
 
-module_path = os.path.abspath('/home/jakub/engineering_proj/robot-control-system/current_v2')
+module_path = os.path.abspath('/home/jakub/python_test/App_V10/current_v2/')
 sys.path.insert(0, module_path)
 
-from serial_communication import SerialCommunication
-from auto_control_mode import AutoModeModule
-from camera_module import CameraModule
+from control_system.serial_communication import SerialCommunication
+from control_system.auto_control_mode import AutoModeModule
+from control_system.camera_module import CameraModule
 from web_app.app import WebAppVisu
 
 def mainTask(serial_com):
@@ -72,7 +72,7 @@ def start_web_app_task():
 
 def main():
     # serial_com = SerialCommunication()
-    serial_com = 0
+    serial_com = SerialCommunication()
     mainTask(serial_com)
 
 if __name__ == "__main__":

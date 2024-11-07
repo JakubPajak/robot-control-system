@@ -7,10 +7,43 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
-    <h1 class="main_title">Live Video</h1>
-    <div class="video_container">
-        <img src="{{ url_for('video') }}" width="50%">
+    <div class="container">
+        <header class="header">
+            <h1 class="main_title">Control Panel - Live Video Feed</h1>
+        </header>
+        
+        <main class="main_content">
+            <section class="video_section">
+                <div class="video_container">
+                    <img src="{{ url_for('video') }}" class="video_feed">
+                </div>
+            </section>
+            
+            <section class="control_section">
+                <h2>Controls</h2>
+                <button class="control_button" onclick="startStream()">Start Stream</button>
+                <button class="control_button" onclick="stopStream()">Stop Stream</button>
+            </section>
+            
+            <section class="status_section">
+                <h2>Status</h2>
+                <div class="status_container">
+                    <p id="status_text">Status: Waiting for stream...</p>
+                </div>
+            </section>
+        </main>
     </div>
-    
+
+    <script>
+        function startStream() {
+            document.getElementById("status_text").innerText = "Status: Stream started";
+            // Add start stream functionality here
+        }
+
+        function stopStream() {
+            document.getElementById("status_text").innerText = "Status: Stream stopped";
+            // Add stop stream functionality here
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,138 @@
+/* General styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Layout containers */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f4f4f9;
+    color: #333;
+    min-height: 100vh;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+}
+
+.main_content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Main title styling */
+.main_title {
+    font-size: 2em;
+    color: #222;
+}
+
+/* Video feed section */
+.video_section {
+    width: 100%;
+    margin: 5px 0;
+}
+
+.video_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #333;
+    background-color: #000;
+    padding: 2px;
+    border-radius: 10px;
+}
+
+.video_feed {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    border-radius: 5px;
+    /* box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3); */
+}
+
+/* Control section styling */
+.control_section {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.control_section h2 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #444;
+}
+
+.control_button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.control_button:hover {
+    background-color: #0056b3;
+}
+
+/* Status section styling */
+.status_section {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px 0;
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #e9ecef;
+}
+
+.status_section h2 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #444;
+}
+
+.status_container {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#status_text {
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+    .video_feed {
+        max-height: 400px;
+    }
+    
+    .main_title {
+        font-size: 1.5em;
+    }
+    
+    .control_button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+}
