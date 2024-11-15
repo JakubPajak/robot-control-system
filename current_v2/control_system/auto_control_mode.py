@@ -37,7 +37,7 @@ class AutoModeModule:
         
     def selectPath(self):
         # Interpretacja ścieżki z JSONa (zakładając, że masz już tę funkcję)
-        path_id = 'path2'
+        path_id = 'path3'
         path = self.InterpretPathFromJson(path_id)
 
         # Przechodzenie przez kolejne kroki ścieżki

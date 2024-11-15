@@ -22,7 +22,7 @@ import time
 class SerialCommunication:
     
     def __init__(self):
-        self.ser = serial.Serial('/dev/ttyUSB0', 250000, timeout=1)
+        self.ser = serial.Serial('/dev/ttyACM0', 250000, timeout=1)
 
         if self.ser.is_open:
             print("Serial port is open")
