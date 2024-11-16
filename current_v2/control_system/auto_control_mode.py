@@ -1,6 +1,7 @@
 import json
 import time
 from ardu_upload_module import ArduinoUploader
+from camera_module import CameraModule
 
 ####################---> Description <---##################### 
 #
@@ -26,6 +27,8 @@ class AutoModeModule:
     def __init__(self, serial_com, status):
         self.serial_com = serial_com
         self.status = status
+        self.iterations = 0
+        self.camera_module = CameraModule()
 
         # During __init__ the proper code must be uploaded to Arduino 
         # This will ensure that correct actions will be performed even after 
@@ -36,35 +39,68 @@ class AutoModeModule:
 
         
     def selectPath(self):
-        # Interpretacja ścieżki z JSONa (zakładając, że masz już tę funkcję)
-        path_id = 'path3'
-        path = self.InterpretPathFromJson(path_id)
+        # if self.iterations != 0:
+        #     path0 = self.interpretPathFromJson('path0')
+        #     self.executePath(path0)
+        #     self.iterations += 1
 
-        # Przechodzenie przez kolejne kroki ścieżki
+        detected_color = self.camera_module.process_frame()
+        path_id = self.choosePath(detected_color[4])
+        path = self.interpretPathFromJson(path_id)
+        self.executePath(path)
+
+        self.selectPath()
+
+        # while not self.status and self.iterations == 0:
+        #     time.sleep(1)
+        #     self.status = self.serial_com.send_data("path0")
+        #     if self.status:
+        #         print(f'Order nr {i} has been performed with value: {path[i]}')
+        #     else:
+        #         print(f'Failed to perform order nr {i}, retrying...')
+
+        #     print(f'Order nr {i} completed successfully.')
+
+        # detected_color = self.camera_module.process_frame()
+
+        # path_id = self.choosePath(detected_color)
+        # path = self.interpretPathFromJson(path_id)
+        # self.iterations += 1
+
+        # for i in range(len(path)):
+        #     self.status = False
+
+        #     while not self.status:
+        #         time.sleep(1)
+        #         self.status = self.serial_com.send_data(path[i])
+        #         if self.status:
+        #             print(f'Order nr {i} has been performed with value: {path[i]}')
+        #         else:
+        #             print(f'Failed to perform order nr {i}, retrying...')
+
+        #     print(f'Order nr {i} completed successfully.')
+
+
+    def executePath(self, path):
         for i in range(len(path)):
-            # Ustawienie statusu na False, aby sprawdzić, czy ruch został wykonany
-            self.status = False
+            status = False
 
-            # Wysyłanie danych do Arduino i oczekiwanie na potwierdzenie zakończenia
-            while not self.status:
+            while not status:
                 time.sleep(1)
-                self.status = self.serial_com.send_data(path[i])
-                if self.status:
+                status = self.serial_com.send_data(path[i])
+                if status:
                     print(f'Order nr {i} has been performed with value: {path[i]}')
                 else:
                     print(f'Failed to perform order nr {i}, retrying...')
 
-            # Przejście do kolejnego kroku, gdy Arduino potwierdzi zakończenie
             print(f'Order nr {i} completed successfully.')
 
-    def InterpretPathFromJson(self, path_id):
+    def interpretPathFromJson(self, path_id):
         with open('path.json', 'r') as file:
             data = json.load(file)
 
-            # Access the paths dictionary using the provided string key (path_id)
             paths = data['robot_instructions']['paths']
 
-            # Make sure the path_id exists in the dictionary
             if path_id in paths:
                 selected_path = paths[path_id]
             else:
@@ -73,70 +109,43 @@ class AutoModeModule:
             formatted_frame_table = []
 
             for step in selected_path:
-                temp_frame = bytearray(2)  # Używamy tylko dwóch bajtów
+                temp_frame = bytearray(2) 
 
                 if step["action"] == "turn":
                     action = 1  
                     direction = 0 if step["direction"] == "left" else 1  
                     angle = step["angle"]
 
-                    # Pierwszy bajt: akcja i kierunek
-                    temp_frame[0] = (action << 6) | (direction << 5)  # Ustawienie akcji i kierunku
+                    temp_frame[0] = (action << 6) | (direction << 5) 
 
-                    # Drugi bajt: kąt skrętu, musimy to zakodować
-                    temp_frame[1] = angle & 0xFF  # Ustawienie dolnego bajtu kąta (0-255)
+                    temp_frame[1] = angle & 0xFF  
 
                 elif step["action"] == "forward":
                     action = 0
                     distance = step["distance"]
 
-                    temp_frame[0] = (action << 7)  # Ustawienie akcji
+                    temp_frame[0] = (action << 7)  
 
-                    temp_frame[1] = distance & 0xFF  # Ustawienie dolnego bajtu prędkości (0-255)
+                    temp_frame[1] = distance & 0xFF 
 
                 elif step["action"] == "grab":
-                    servo_action = 1  # Ustawienie wartości dla serwo
-                    servo_action_type = 1 if step["grab_type"] == "close" else 0  # Ustawienie typu akcji serwo (open/close)
+                    servo_action = 1 
+                    servo_action_type = 1 if step["grab_type"] == "close" else 0  
                     temp_frame[0] = (servo_action << 4) | (servo_action_type << 3)
 
                 formatted_frame_table.append(temp_frame)
 
             return formatted_frame_table
+        
+    def choosePath(self, detected_color):
 
+        if(detected_color == 'red'):
+            path_id = 'path1'
+        elif(detected_color == 'blue'):
+            path_id = 'path2'
+        elif(detected_color == 'green'):
+            path_id = 'path3'
+        elif(detected_color == 'unknown'):
+            self.status.set()
 
-    # def InterpretPathFromJson(self, path_id):
-    #     with open('path.json', 'r') as file:
-    #         data = json.load(file)
-
-    #         # Access the paths dictionary using the provided string key (path_id)
-    #         paths = data['robot_instructions']['paths']
-
-    #         # Make sure the path_id exists in the dictionary
-    #         if path_id in paths:
-    #             selected_path = paths[path_id]
-    #         else:
-    #             raise ValueError(f"Path ID '{path_id}' not found in the JSON file")
-
-    #         formatted_frame_table = []
-
-    #         for step in selected_path:
-    #             temp_frame = bytearray(2)
-
-    #             if step["action"] == "turn":
-    #                 action = 1  
-    #                 direction = 0 if step["direction"] == "left" else 1  
-    #                 angle = step["angle"]
-
-    #                 temp_frame[0] = (action << 7) | (direction << 6)
-    #                 temp_frame[1:] = struct.pack(">H", angle)
-
-    #             elif step["action"] == "forward":
-    #                 action = 0
-    #                 speed = step["speed"]
-
-    #                 temp_frame[0] = (action << 7)
-    #                 temp_frame[1:3] = struct.pack(">H", speed)
-
-    #             formatted_frame_table.append(temp_frame)
-
-    #     return formatted_frame_table
+        return path_id
